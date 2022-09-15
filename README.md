@@ -232,45 +232,12 @@ to make the code bases work together. Think: Nessie requires code changes on top
 branch to let Nessie's Spark extensions work with the latest version of Iceberg. For this reason,
 we maintain "integrations branches" with the necessary changes.
 
-### Git worktree
-
-Notes:
-* including Nessie source builds only works with Nessie built with Gradle.
-* including Iceberg source builds only works with recent Iceberg from the master branch.
-
-The easiest way to implement this locally is to use [Git worktree](https://git-scm.com/docs/git-worktree).
-
-1. Clone this repository and save the path in `NESSIE_INTEGRATION_TESTS`
-   ```shell
-   git clone https://github.com/projectnessie/nessie-integration-tests
-   NESSIE_INTEGRATION_TESTS=$(realpath nessie-integration-tests)
-   ```
-2. Go to your local Nessie clone and create a Git worktree in the [`included-builds/`](included-builds)
-   directory.
-   ```shell
-   cd PATH_TO_YOUR_LOCAL_NESSIE_CLONE
-   git branch -b integ-bump/iceberg origin/integ-bump/iceberg
-   git worktree add ${NESSIE_INTEGRATION_TESTS}/included-builds/nessie integ-bump/iceberg
-   ```
-3. Go to your local Iceberg clone and create a Git worktree in the [`included-builds/`](included-builds)
-   directory.
-   ```shell
-   cd PATH_TO_YOUR_LOCAL_ICEBERG_CLONE
-   git branch -b master-nessie origin/master
-   git worktree add ${NESSIE_INTEGRATION_TESTS}/included-builds/iceberg master-nessie
-   ```
-   Note: the above example uses a Git worktree with a branch "detached" from the
-   origin's `master` branch. As long as there are no code changes necessary, it might be way more
-   convenient to just create a symbolic link to your local Iceberg clone containing the already
-   checked out `master` branch.
-
 #### Symbolic links
 
 **DISCLAIMER** Including the Nessie build does **not** work correctly in IntelliJ!
-Do _always_ use a Git worktree (or Git clone) as discussed above.
 
-As an alternative, you can also create symbolic links called `nessie` and `iceberg` to your local
-clones/worktrees with the "right" code. Example:
+You can create symbolic links called `nessie` and `iceberg` to your local
+clones with the "right" code. Example:
 ```shell
 ln -s INSERT_PATH_TO_YOUR_LOCAL_NESSIE_CLONE included-builds/nessie
 ln -s INSERT_PATH_TO_YOUR_LOCAL_ICEBERG_CLONE included-builds/iceberg
@@ -280,7 +247,7 @@ ln -s INSERT_PATH_TO_YOUR_LOCAL_ICEBERG_CLONE included-builds/iceberg
 
 Canary build:
 ```bash
-./gradlew :nessie:clients:client:jar :iceberg:iceberg-nessie:jar :iceberg:iceberg-core:jar
+./gradlew :nessie:nessie-client:jar :iceberg:iceberg-nessie:jar :iceberg:iceberg-core:jar
 ```
 
 Run Iceberg/Nessie tests:
@@ -290,7 +257,7 @@ Run Iceberg/Nessie tests:
 
 Run Nessie Spark 3.2 Extensions tests:
 ```bash
-./gradlew :nessie:clients:spark-32-extensions:intTest
+./gradlew :nessie-iceberg:nessie-spark-extensions-3.1_2.12:test
 ```
 
 Run the actual integrations tests:
