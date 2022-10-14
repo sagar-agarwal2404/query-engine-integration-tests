@@ -375,12 +375,18 @@ include("nqeit-iceberg-spark-extension")
 
 include("nqeit-presto-extension")
 
+include("nqeit-iceberg-dremio-extension")
+
+include("nqeit-iceberg-dremio-extension")
+
+
 fun includeProject(artifactId: String, projectDir: File) {
   include(artifactId)
   val p = project(":$artifactId")
   p.projectDir = projectDir
 }
 
+includeProject("nqeit-iceberg-dremio"), file("nqeit-iceberg-dremio"))
 for (sparkVersion in sparkVersions) {
   if (restrictedVersion(sparkRestrictions, sparkVersion)) {
     continue
@@ -430,4 +436,8 @@ for (crossEngineSetup in
   if (ideSyncActive) {
     break
   }
+}
+
+if (false) {
+  include("gradle:dependabot")
 }
