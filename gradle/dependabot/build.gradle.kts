@@ -31,7 +31,7 @@ plugins {
   id("com.diffplug.spotless") version "6.10.0"
   id("com.github.johnrengelman.plugin-shadow") version "7.1.2"
   id("com.github.vlsi.jandex") version "1.82"
-  id("net.ltgt.errorprone") version "2.0.2"
+  id("net.ltgt.errorprone") version "3.0.1"
   id("org.caffinitas.gradle.testrerun") version "0.1"
   id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6"
   id("org.projectnessie") version "0.27.3"
