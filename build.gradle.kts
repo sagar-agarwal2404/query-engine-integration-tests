@@ -24,7 +24,7 @@ plugins {
 
 val versionAssertJ = "3.23.1"
 val versionCheckstyle = "10.3.3"
-val versionErrorProneAnnotations = "2.15.0"
+val versionErrorProneAnnotations = "2.16"
 val versionErrorProneCore = "2.15.0"
 val versionErrorProneSlf4j = "0.1.15"
 val versionGoogleJavaFormat = "1.15.0"
