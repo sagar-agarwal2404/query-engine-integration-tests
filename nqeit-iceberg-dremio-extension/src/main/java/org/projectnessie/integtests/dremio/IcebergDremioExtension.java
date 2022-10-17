@@ -20,11 +20,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-
-import java.net.URI;
 import java.util.Objects;
-
-import static org.projectnessie.integtests.nessie.internal.Util.checkSupportedParameterType;
 
 public class IcebergDremioExtension implements ParameterResolver{
 
@@ -33,12 +29,6 @@ public class IcebergDremioExtension implements ParameterResolver{
       System.getProperty("dremio.base-url"),
       "Base URL not set correctly: dremio.base-url");
   }
-
-  /*private static String sonarEndPoint(){
-    return Objects.requireNonNull(
-      System.getProperty("dremio.endPoint"),
-      "End Point not set correctly: dremio.endPoint");
-  }*/
 
   private static String sonarPAT(){
     return Objects.requireNonNull(
@@ -52,26 +42,45 @@ public class IcebergDremioExtension implements ParameterResolver{
       "Project Id not set correctly: dremio.project-id");
   }
 
-  private static String SonarQueryUrl(){
-    return String.format(sonarBaseUrl() + "/ui/projects/" + sonarProjectId() + "/sql");
+//  private static String SonarQueryUrl(){
+//    return String.format(sonarBaseUrl() + "/ui/projects/" + sonarProjectId() + "/sql");
+//  }
+
+
+  private boolean isBaseURL(ParameterContext paramCtx) {
+    return paramCtx.getParameter().getName().equals("baseUrl")
+      && paramCtx.getParameter().getType().equals(String.class);
   }
 
-  public static void setup(URI SonarEndpoint, URI SonarBaseURL, String projectId){
+  private boolean isToken(ParameterContext paramCtx) {
+    return paramCtx.getParameter().getName().equals("token")
+      && paramCtx.getParameter().getType().equals(String.class);
+  }
 
+  private boolean isProjectId(ParameterContext paramCtx) {
+    return paramCtx.getParameter().getName().equals("projectId")
+      && paramCtx.getParameter().getType().equals(String.class);
   }
 
   @Override
-  public boolean supportsParameter(
-    ParameterContext parameterContext, ExtensionContext extensionContext)
+  public boolean supportsParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
     throws ParameterResolutionException {
-    return
-      parameterContext.getParameter().
+    return isBaseURL(paramCtx) || isToken(paramCtx) || isProjectId(paramCtx);
   }
 
   @Override
-  public Object resolveParameter(
-    ParameterContext parameterContext, ExtensionContext extensionContext)
+  public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
     throws ParameterResolutionException {
-
+    if (isBaseURL(paramCtx)) {
+      return sonarBaseUrl();
+    }
+    if (isToken(paramCtx)) {
+      return sonarPAT();
+    }
+    if (isProjectId(paramCtx)) {
+      return sonarProjectId();
+    }
+    throw new ParameterResolutionException(
+      "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
   }
 }

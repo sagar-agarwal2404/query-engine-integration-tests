@@ -16,136 +16,108 @@
 
 package org.projectnessie.integtests.dremio;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.*;
-
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.projectnessie.integtests.nessie.NessieTestsExtension;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-@ExtendWith({NessieTestsExtension.class, IcebergDremioExtension.class})
+@ExtendWith({ IcebergDremioExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
 public class ITIcebergDremio{
 
-  String baseUrl =  "https://app.test1.dremio.site";
-  String token = "tAHxjsGOSPCfzNfrVhQ4auT0uEw3RGbvSrKriUKincyswR938naEJN9e/zG9ew==";
-  String projectId = "35770c76-b747-4151-a9a2-06f0302f0805";
+  String baseUrl =  null;
+  String token = null;
+  String projectId = null;
+  String sqlEndPoint = null;
   @BeforeEach
-  public void setUp(String url, String token, String projectId){
-    this.baseUrl = url;
+  public void setUp(String baseUrl, String token, String projectId){
+    this.baseUrl = baseUrl;
     this.token = token;
     this.projectId = projectId;
+    this.sqlEndPoint = "/ui/projects/" + projectId + "/sql";
   }
 
+  @BeforeAll
+  public static void dropTableIfExists(String baseUrl, String token, String projectId){
+    String payload = "{ \"sql\": \"DROP TABLE IF EXISTS keith.sagar.foo_bar\" }";
+    String endPoint = "/ui/projects/" + projectId + "/sql";
+    RestAssured.baseURI = baseUrl;
+    RequestSpecification httpRequest =  RestAssured.given()
+      .header("Authorization","Bearer " + token)
+      .header("Content-Type","application/json");
+    assertEquals(200,httpRequest.body(payload).post(endPoint).getStatusCode());
+  }
+
+  private RequestSpecification rest(){
+    return RestAssured.given()
+      .baseUri(baseUrl)
+      .header("Authorization","Bearer " + token)
+      .header("Content-Type","application/json");
+  }
+
+//  private String getJobStatus( String jobId){
+//    String jobStatusUri = "https://app.test1.dremio.site/ui/projects/" + projectId + "/jobs-listing/v1.0/" + jobId + "/jobDetails";
+//    String jobStatus = "RUNNING";
+//    Response response;
+//    while(Objects.equals(jobStatus, "RUNNING")) {
+//      response = rest()
+//        .baseUri(jobStatusUri)
+//        .when()
+//        .get();
+//      String jsonString = response.getBody().asString();
+//      jobStatus = JsonPath.from(jsonString).get("jobStatus");
+//    }
+//    return jobStatus;
+//  }
   @Order(100)
   @Test
   public void createTable(){
-    String payload = "{" +
-      "    \"sql\": \"CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)\"" +
-      "}";
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    Response response = httpRequest.body(payload).post(endPoint);
-    assertEquals(200, response.getStatusCode());
+    String payload = "{ \"sql\": \"CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)\" }";
+    assertEquals(200,rest().body(payload).post(sqlEndPoint).getStatusCode());
   }
 
-  private static final List<List<Object>> tableRows = new ArrayList<>();
   @Order(110)
   @Test
-  public void insertInto(){
-    String payload = "{" +
-      "    \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (456,\'bar\') \"" +
-      "}";
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    Response response1 = httpRequest.body(payload).post(endPoint);
-    assertEquals(200, response1.getStatusCode());
-
-    String jsonString = response1.getBody().asString();
-    String jobId = JsonPath.from(jsonString).get("jobId.id");
-    RestAssured.baseURI = "https://app.test1.dremio.site/ui/projects/" + projectId + "/jobs-listing/v1.0/" + jobId + "/jobDetails";
-    String jobStatus = "RUNNING";
-    Map response2;
-    while(Objects.equals(jobStatus, "RUNNING")) {
-      response2 = RestAssured.given()
-        .header("Authorization", "Bearer " + token)
-        .header("Content-Type", "application/json")
-        .when()
-        .get()
-        .as(Map.class);
-      jobStatus = (String)response2.get("jobStatus");
-    }
-    tableRows.add(asList(456, "bar"));
+  public void insertInto() {
+    String payload = "{ \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (456,\'bar\') \" }";
+    Response response = rest().body(payload).post(sqlEndPoint);
+    String jsonString = response.getBody().asString();
+    int returnedRowCount = JsonPath.from(jsonString).get("returnedRowCount");
+    assertEquals(1, returnedRowCount);
   }
+
   @Order(120)
   @Test
   public void selectFrom(){
-    String payload = "SELECT * FROM keith.sagar.\"foo_bar\"";
-
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    Map response = httpRequest.body(payload).post(endPoint).as(Map.class);
+    String payload = "{ \"sql\": \"SELECT * FROM keith.sagar.foo_bar\" }";
+    Map response = rest().body(payload).post(sqlEndPoint).as(Map.class);
   }
 
   @Order(130)
   @Test
-  public void insertInto2(){
-    //for inserting the data
-    String payload = "{" +
-      "    \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (123,\'foo\') \"" +
-      "}";
-
-    //end point for create table query
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    Map response1 = httpRequest.body(payload).post(endPoint).as(Map.class);
-
-    String jobId = (String)response1.get("jobId.id");
-    String response_url = "https://app.test1.dremio.site/ui/projects/" + projectId + "/jobs-listing/v1.0/" + jobId + "/jobDetails";
-    RestAssured.baseURI = response_url;
-    String jobStatus = "RUNNING";
-    Map response2;
-    while(Objects.equals(jobStatus, "RUNNING")) {
-      response2 = RestAssured.given()
-        .header("Authorization", "Bearer " + token)
-        .header("Content-Type", "application/json")
-        .when()
-        .get()
-        .as(Map.class);
-      jobStatus = (String) response2.get("jobStatus");
-    }
+  public void insertInto2() {
+    String payload = "{ \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (123,\'foo\') \" }";
+    Response response = rest().body(payload).post(sqlEndPoint);
+    String jsonString = response.getBody().asString();
+    int returnedRowCount = JsonPath.from(jsonString).get("returnedRowCount");
+    assertEquals(1, returnedRowCount);
   }
 
   @Order(140)
   @Test
-  public void selectFrom2(){
-    String payload = "SELECT * FROM keith.sagar.\"foo_bar\"";
+  public void selectFrom2() {
+    String payload = "{ \"sql\": \"SELECT * FROM keith.sagar.foo_bar }";
+    Response response = rest().body(payload).post(sqlEndPoint);
+  }
 
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    Map response = httpRequest.body(payload).post(endPoint).as(Map.class);
+  @Order(150)
+  @Test
+  public void dropTable(){
+    String payload = "{ \"sql\": \"DROP TABLE keith.sagar.foo_bar\" }";
+    assertEquals(200,rest().body(payload).post(sqlEndPoint).getStatusCode());
   }
 }
