@@ -31,114 +31,54 @@ import io.restassured.specification.RequestSpecification;
 
 public class ITIcebergDremio{
 
-  String baseUrl =  null;
-  String token = null;
-  String projectId = null;
-  @BeforeEach
-  public void setUp(String baseUrl, String token, String projectId){
-    this.baseUrl = baseUrl;
-    this.token = token;
-    this.projectId = projectId;
-  }
-
   @BeforeAll
-  public static void dropTableIfExists(String baseUrl, String token, String projectId){
-    String payload = "{ \"sql\": \"DROP TABLE IF EXISTS keith.sagar.foo_bar\" }";
-    String endPoint = "/ui/projects/" + projectId + "/sql";
-    RestAssured.baseURI = baseUrl;
-    RequestSpecification httpRequest =  RestAssured.given()
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json");
-    httpRequest.body(payload).post(endPoint).then().statusCode(200).extract().as(Map.class);
+  public static void setUp(DremioHelper dremioHelper){
+    dropTableIfExists(dremioHelper);
   }
 
-  private RequestSpecification rest(){
-    return RestAssured.given()
-      .baseUri(baseUrl)
-      .header("Authorization","Bearer " + token)
-      .header("Content-Type","application/json")
-      .basePath("ui/projects/" + projectId);
-  }
-
-  private String getJobStatus( String jobId, String projectId){
-    RestAssured.baseURI = "https://app.test1.dremio.site/ui/projects/" + projectId + "/jobs-listing/v1.0/" + jobId + "/jobDetails";
-    String jobStatus = "RUNNING";
-    while(Objects.equals(jobStatus, "RUNNING")) {
-      jobStatus = (String)RestAssured
-        .given()
-        .header("Authorization","Bearer " + token)
-        .header("Content-Type","application/json")
-        .when()
-        .get()
-        .as(Map.class).get("jobStatus");
-    }
-    return jobStatus;
+  private static void dropTableIfExists(DremioHelper dremioHelper){
+    dremioHelper.executeDmlStatement("DROP TABLE IF EXISTS keith.sagar.foo_bar");
   }
 
   @Order(100)
   @Test
-  public void createTable(){
-    String payload = "{ \"sql\": \"CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)\" }";
-    rest().body(payload).post("/sql").then().statusCode(200).extract().as(Map.class);
+  public void createTable(DremioHelper dremioHelper){
+    dremioHelper.executeDmlStatement("CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)");
   }
 
   private static final List<List<Object>> tableRows = new ArrayList<>();
-  private static final List<List<Object>> insertedRows = new ArrayList<>();
+
   @Order(110)
   @Test
-  public void insertInto() {
-    String payload = "{ \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (456,\'bar\') \" }";
-    Response response = rest().body(payload).post("/datasets/new_untitled_sql_and_run?newVersion=0008001390760");
-    String jsonString = response.getBody().asString();
-    String jobId = JsonPath.from(jsonString).get("jobId.id");
-    if(Objects.equals(getJobStatus(jobId,projectId), "COMPLETED")) {
-      tableRows.add(asList(456, "bar"));
-    }
+  public void insertInto(DremioHelper dremioHelper) {
+    dremioHelper.runInsertQuery("INSERT INTO keith.sagar.foo_bar VALUES (456,'bar')");
+    tableRows.add(asList(456, "bar"));
   }
 
   @Order(120)
   @Test
-  public void selectFrom(){
-    String payload = "{ \"sql\": \"SELECT * FROM keith.sagar.foo_bar\" }";
-    Response response = rest().body(payload).post("/sql");
-    String jsonString = response.getBody().asString();
-    int id1 = JsonPath.from(jsonString).get("rows[0].row[0].v");
-    String val1 = JsonPath.from(jsonString).get("rows[0].row[1].v");
-    assertThat(tableRows.contains(Arrays.asList(id1, val1))).isTrue();
+  public void selectFrom(DremioHelper dremioHelper){
+    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.sagar.foo_bar");
+    assertThat(tableRows).containsAll(rows);
   }
 
   @Order(130)
   @Test
-  public void insertInto2() {
-    String payload = "{ \"sql\": \"INSERT INTO keith.sagar.foo_bar VALUES (123,\'foo\') \" }";
-    Response response = rest().body(payload).post("/datasets/new_untitled_sql_and_run?newVersion=0008001390760");
-    String jsonString = response.getBody().asString();
-    String jobId = JsonPath.from(jsonString).get("jobId.id");
-    if(Objects.equals(getJobStatus(jobId,projectId), "COMPLETED")) {
-      tableRows.add(asList(123, "foo"));
-    }
+  public void insertInto2(DremioHelper dremioHelper) {
+    dremioHelper.runInsertQuery("INSERT INTO keith.sagar.foo_bar VALUES (123,'foo')");
+    tableRows.add(asList(123, "foo"));
   }
 
   @Order(140)
   @Test
-  public void selectFrom2() {
-    String payload = "{ \"sql\": \"SELECT * FROM keith.sagar.foo_bar \"}";
-    Response response = rest().body(payload).post("/sql");
-    String jsonString = response.getBody().asString();
-    int id1 = JsonPath.from(jsonString).get("rows[0].row[0].v");
-    String val1 = JsonPath.from(jsonString).get("rows[0].row[1].v");
-    int id2 = JsonPath.from(jsonString).get("rows[0].row[0].v");
-    String val2 = JsonPath.from(jsonString).get("rows[0].row[1].v");
-    insertedRows.add(asList(id1,val1));
-    insertedRows.add(asList(id2,val2));
-
-    assertThat(tableRows.containsAll(insertedRows)).isTrue();
+  public void selectFrom2(DremioHelper dremioHelper) {
+    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.sagar.foo_bar");
+    assertThat(tableRows).containsAll(rows);
   }
 
   @Order(150)
   @Test
-  public void dropTable(){
-    String payload = "{ \"sql\": \"DROP TABLE keith.sagar.foo_bar\" }";
-    rest().body(payload).post("/sql").then().statusCode(200).extract().as(Map.class);
+  public void dropTable(DremioHelper dremioHelper){
+    dremioHelper.executeDmlStatement("DROP TABLE keith.sagar.foo_bar");
   }
 }

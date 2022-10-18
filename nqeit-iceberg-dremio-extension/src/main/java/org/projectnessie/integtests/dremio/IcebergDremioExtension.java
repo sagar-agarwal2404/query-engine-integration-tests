@@ -42,43 +42,32 @@ public class IcebergDremioExtension implements ParameterResolver{
       "Project Id not set correctly: dremio.project-id");
   }
 
-//  private static String SonarQueryUrl(){
-//    return String.format(sonarBaseUrl() + "/ui/projects/" + sonarProjectId() + "/sql");
+//  private boolean isBaseURL(ParameterContext paramCtx) {
+//    return paramCtx.getParameter().getName().equals("baseUrl")
+//      && paramCtx.getParameter().getType().equals(String.class);
 //  }
-
-
-  private boolean isBaseURL(ParameterContext paramCtx) {
-    return paramCtx.getParameter().getName().equals("baseUrl")
-      && paramCtx.getParameter().getType().equals(String.class);
-  }
-
-  private boolean isToken(ParameterContext paramCtx) {
-    return paramCtx.getParameter().getName().equals("token")
-      && paramCtx.getParameter().getType().equals(String.class);
-  }
-
-  private boolean isProjectId(ParameterContext paramCtx) {
-    return paramCtx.getParameter().getName().equals("projectId")
-      && paramCtx.getParameter().getType().equals(String.class);
-  }
+//
+//  private boolean isToken(ParameterContext paramCtx) {
+//    return paramCtx.getParameter().getName().equals("token")
+//      && paramCtx.getParameter().getType().equals(String.class);
+//  }
+//
+//  private boolean isProjectId(ParameterContext paramCtx) {
+//    return paramCtx.getParameter().getName().equals("projectId")
+//      && paramCtx.getParameter().getType().equals(String.class);
+//  }
 
   @Override
   public boolean supportsParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
     throws ParameterResolutionException {
-    return isBaseURL(paramCtx) || isToken(paramCtx) || isProjectId(paramCtx);
+    return paramCtx.getParameter().getType().equals(DremioHelper.class);
   }
 
   @Override
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
     throws ParameterResolutionException {
-    if (isBaseURL(paramCtx)) {
-      return sonarBaseUrl();
-    }
-    if (isToken(paramCtx)) {
-      return sonarPAT();
-    }
-    if (isProjectId(paramCtx)) {
-      return sonarProjectId();
+    if(paramCtx.getParameter().getType().equals(DremioHelper.class)){
+      return new DremioHelper(sonarProjectId(),sonarPAT(),sonarBaseUrl());
     }
     throw new ParameterResolutionException(
       "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
