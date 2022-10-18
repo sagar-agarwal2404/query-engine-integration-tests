@@ -309,3 +309,4 @@ fun DependencyHandlerScope.prestoDependencies(configuration: String, presto: Pre
     "com.facebook.presto:presto-tests:${presto.prestoVersion}"
   )
 }
+

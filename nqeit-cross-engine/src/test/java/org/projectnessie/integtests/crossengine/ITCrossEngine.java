@@ -27,10 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.apache.spark.sql.SparkSession;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,8 +41,8 @@ import org.projectnessie.integtests.nessie.NessieTestsExtension;
 
 @ExtendWith({IcebergSparkExtension.class, IcebergFlinkExtension.class, NessieTestsExtension.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ITCrossEngine {
 
+public class ITCrossEngine {
   @Order(100)
   @Test
   public void createTables(@Spark SparkSession spark) {
