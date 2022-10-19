@@ -435,7 +435,3 @@ for (crossEngineSetup in
     break
   }
 }
-
-if (false) {
-  include("gradle:dependabot")
-}

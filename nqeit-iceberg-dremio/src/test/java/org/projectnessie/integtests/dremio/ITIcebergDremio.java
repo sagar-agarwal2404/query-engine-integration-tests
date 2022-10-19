@@ -13,36 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.projectnessie.integtests.dremio;
 
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-@ExtendWith({ IcebergDremioExtension.class})
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
-public class ITIcebergDremio{
+@ExtendWith({IcebergDremioExtension.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class ITIcebergDremio {
 
   @BeforeAll
-  public static void setUp(DremioHelper dremioHelper){
+  public static void setUp(DremioHelper dremioHelper) {
     dropTableIfExists(dremioHelper);
   }
 
-  private static void dropTableIfExists(DremioHelper dremioHelper){
+  private static void dropTableIfExists(DremioHelper dremioHelper) {
     dremioHelper.executeDmlStatement("DROP TABLE IF EXISTS keith.sagar.foo_bar");
   }
 
   @Order(100)
   @Test
-  public void createTable(DremioHelper dremioHelper){
+  public void createTable(DremioHelper dremioHelper) {
     dremioHelper.executeDmlStatement("CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)");
   }
 
@@ -57,7 +52,7 @@ public class ITIcebergDremio{
 
   @Order(120)
   @Test
-  public void selectFrom(DremioHelper dremioHelper){
+  public void selectFrom(DremioHelper dremioHelper) {
     List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.sagar.foo_bar");
     assertThat(tableRows).containsAll(rows);
   }
@@ -78,7 +73,7 @@ public class ITIcebergDremio{
 
   @Order(150)
   @Test
-  public void dropTable(DremioHelper dremioHelper){
+  public void dropTable(DremioHelper dremioHelper) {
     dremioHelper.executeDmlStatement("DROP TABLE keith.sagar.foo_bar");
   }
 }

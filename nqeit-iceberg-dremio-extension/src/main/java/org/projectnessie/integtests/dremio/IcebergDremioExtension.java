@@ -13,63 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.projectnessie.integtests.dremio;
 
-import org.junit.jupiter.api.extension.ParameterResolver;
+import java.util.Objects;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import java.util.Objects;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
-public class IcebergDremioExtension implements ParameterResolver{
+public class IcebergDremioExtension implements ParameterResolver {
 
-  private static String sonarBaseUrl(){
+  private static String sonarBaseUrl() {
     return Objects.requireNonNull(
-      System.getProperty("dremio.base-url"),
-      "Base URL not set correctly: dremio.base-url");
+        System.getProperty("dremio.base-url"), "Base URL not set correctly: dremio.base-url");
   }
 
-  private static String sonarPAT(){
+  private static String sonarPAT() {
     return Objects.requireNonNull(
-      System.getProperty("dremio.PAT"),
-      "PAT not set correctly: dremio.endPAT");
+        System.getProperty("dremio.PAT"), "PAT not set correctly: dremio.endPAT");
   }
 
-  private static String sonarProjectId(){
+  private static String sonarProjectId() {
     return Objects.requireNonNull(
-      System.getProperty("dremio.project-id"),
-      "Project Id not set correctly: dremio.project-id");
+        System.getProperty("dremio.project-id"), "Project Id not set correctly: dremio.project-id");
   }
-
-//  private boolean isBaseURL(ParameterContext paramCtx) {
-//    return paramCtx.getParameter().getName().equals("baseUrl")
-//      && paramCtx.getParameter().getType().equals(String.class);
-//  }
-//
-//  private boolean isToken(ParameterContext paramCtx) {
-//    return paramCtx.getParameter().getName().equals("token")
-//      && paramCtx.getParameter().getType().equals(String.class);
-//  }
-//
-//  private boolean isProjectId(ParameterContext paramCtx) {
-//    return paramCtx.getParameter().getName().equals("projectId")
-//      && paramCtx.getParameter().getType().equals(String.class);
-//  }
 
   @Override
   public boolean supportsParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
-    throws ParameterResolutionException {
+      throws ParameterResolutionException {
     return paramCtx.getParameter().getType().equals(DremioHelper.class);
   }
 
   @Override
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
-    throws ParameterResolutionException {
-    if(paramCtx.getParameter().getType().equals(DremioHelper.class)){
-      return new DremioHelper(sonarProjectId(),sonarPAT(),sonarBaseUrl());
+      throws ParameterResolutionException {
+    if (paramCtx.getParameter().getType().equals(DremioHelper.class)) {
+      return new DremioHelper(sonarProjectId(), sonarPAT(), sonarBaseUrl());
     }
     throw new ParameterResolutionException(
-      "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
+        "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());
   }
 }
