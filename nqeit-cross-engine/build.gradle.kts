@@ -21,6 +21,7 @@ plugins {
 }
 
 val crossEngine = getCrossEngineVersionsForProject()
+val versionRestAsssured = "5.2.0"
 
 dependencies {
   // picks the right dependencies for scala compilation
@@ -31,9 +32,13 @@ dependencies {
   implementation(project(":nqeit-nessie-common"))
   implementation(project(":nqeit-iceberg-spark-extension"))
   implementation(project(":nqeit-iceberg-flink-extension"))
+  implementation(project(":nqeit-iceberg-dremio-extension"))
 
   icebergSparkDependencies("implementation", crossEngine.sparkScala)
   icebergFlinkDependencies("implementation", crossEngine.flink)
+
+  testImplementation("io.rest-assured:rest-assured:$versionRestAsssured")
+  testImplementation("io.rest-assured:json-schema-validator:$versionRestAsssured")
 
   testImplementation(platform(libs.junit.bom))
   testImplementation(libs.bundles.junit.testing)

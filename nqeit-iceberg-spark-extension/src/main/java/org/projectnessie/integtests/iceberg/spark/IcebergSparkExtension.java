@@ -102,6 +102,12 @@ public class IcebergSparkExtension implements ParameterResolver {
           .set(
               String.format("spark.sql.catalog.%s.expiration-interval-ms", NON_NESSIE_CATALOG),
               "0");
+      conf.set(
+              "spark.sql.catalog.nessie.warehouse",
+              System.getProperty("spark.sql.catalog.nessie.warehouse"))
+          .set(
+              "spark.sql.catalog.nessie.io-impl",
+              System.getProperty("spark.sql.catalog.nessie.io-impl"));
     }
 
     private void applyConf(String k, String v) {

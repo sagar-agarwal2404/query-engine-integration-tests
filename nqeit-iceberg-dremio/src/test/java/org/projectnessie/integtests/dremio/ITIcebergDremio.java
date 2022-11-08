@@ -32,13 +32,13 @@ public class ITIcebergDremio {
   }
 
   private static void dropTableIfExists(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("DROP TABLE IF EXISTS keith.sagar.foo_bar");
+    dremioHelper.executeDmlStatement("DROP TABLE IF EXISTS keith.db.\"foo_bar\"");
   }
 
   @Order(100)
   @Test
   public void createTable(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("CREATE TABLE keith.sagar.foo_bar (id INT, val VARCHAR)");
+    dremioHelper.executeDmlStatement("CREATE TABLE keith.db.\"foo_bar\" (id INT, val VARCHAR)");
   }
 
   private static final List<List<Object>> tableRows = new ArrayList<>();
@@ -46,34 +46,34 @@ public class ITIcebergDremio {
   @Order(110)
   @Test
   public void insertInto(DremioHelper dremioHelper) {
-    dremioHelper.runInsertQuery("INSERT INTO keith.sagar.foo_bar VALUES (456,'bar')");
+    dremioHelper.runInsertQuery("INSERT INTO keith.db.\"foo_bar\" VALUES (456,'bar')");
     tableRows.add(asList(456, "bar"));
   }
 
   @Order(120)
   @Test
   public void selectFrom(DremioHelper dremioHelper) {
-    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.sagar.foo_bar");
+    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.db.\"foo_bar\"");
     assertThat(tableRows).containsAll(rows);
   }
 
   @Order(130)
   @Test
   public void insertInto2(DremioHelper dremioHelper) {
-    dremioHelper.runInsertQuery("INSERT INTO keith.sagar.foo_bar VALUES (123,'foo')");
+    dremioHelper.runInsertQuery("INSERT INTO keith.db.\"foo_bar\" VALUES (123,'foo')");
     tableRows.add(asList(123, "foo"));
   }
 
   @Order(140)
   @Test
   public void selectFrom2(DremioHelper dremioHelper) {
-    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.sagar.foo_bar");
+    List<List<Object>> rows = dremioHelper.runSelectQuery("SELECT * FROM keith.db.\"foo_bar\"");
     assertThat(tableRows).containsAll(rows);
   }
 
   @Order(150)
   @Test
   public void dropTable(DremioHelper dremioHelper) {
-    dremioHelper.executeDmlStatement("DROP TABLE keith.sagar.foo_bar");
+    dremioHelper.executeDmlStatement("DROP TABLE keith.db.\"foo_bar\"");
   }
 }

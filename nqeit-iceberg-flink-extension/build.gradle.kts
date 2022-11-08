@@ -30,6 +30,8 @@ dependencies {
   compileOnly(libs.microprofile.openapi)
   compileOnly(libs.jetbrains.annotations)
   compileOnly(libs.errorprone.annotations)
+  runtimeOnly("software.amazon.awssdk:bundle:2.17.178")
+  runtimeOnly("software.amazon.awssdk:url-connection-client:2.17.178")
 
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
