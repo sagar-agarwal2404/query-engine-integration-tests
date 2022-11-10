@@ -124,6 +124,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
       config.put(
           CatalogProperties.WAREHOUSE_LOCATION,
           IcebergWarehouse.get(extensionContext).getUri().toString());
+
       sql("CREATE CATALOG %s WITH %s", catalogName(), toWithClause(config));
     }
 

@@ -32,6 +32,7 @@ dependencies {
 
   compileOnly(platform(rootProject))
   compileOnly(project(":nqeit-nessie-common"))
+
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
 
