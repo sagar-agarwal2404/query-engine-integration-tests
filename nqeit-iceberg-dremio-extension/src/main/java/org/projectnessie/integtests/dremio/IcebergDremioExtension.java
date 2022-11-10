@@ -23,19 +23,20 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 public class IcebergDremioExtension implements ParameterResolver {
 
-  private static String sonarBaseUrl() {
-    return Objects.requireNonNull(
-        System.getProperty("dremio.base-url"), "Base URL not set correctly: dremio.base-url");
+  private static String readRequiredSystemProperty(String s) {
+    return Objects.requireNonNull(System.getProperty(s), "required system property not set: " + s);
   }
 
-  private static String sonarPAT() {
-    return Objects.requireNonNull(
-        System.getProperty("dremio.PAT"), "PAT not set correctly: dremio.endPAT");
+  private static String dremioUrl() {
+    return readRequiredSystemProperty("dremio.url");
   }
 
-  private static String sonarProjectId() {
-    return Objects.requireNonNull(
-        System.getProperty("dremio.project-id"), "Project Id not set correctly: dremio.project-id");
+  private static String dremioToken() {
+    return readRequiredSystemProperty("dremio.token");
+  }
+
+  private static String dremioProjectId() {
+    return readRequiredSystemProperty("dremio.project-id");
   }
 
   @Override
@@ -48,7 +49,7 @@ public class IcebergDremioExtension implements ParameterResolver {
   public Object resolveParameter(ParameterContext paramCtx, ExtensionContext extensionCtx)
       throws ParameterResolutionException {
     if (paramCtx.getParameter().getType().equals(DremioHelper.class)) {
-      return new DremioHelper(sonarProjectId(), sonarPAT(), sonarBaseUrl());
+      return new DremioHelper(dremioProjectId(), dremioToken(), dremioUrl());
     }
     throw new ParameterResolutionException(
         "Unsupported parameter " + paramCtx.getParameter() + " on " + paramCtx.getTarget());

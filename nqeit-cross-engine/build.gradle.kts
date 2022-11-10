@@ -39,7 +39,6 @@ dependencies {
 
   testImplementation("io.rest-assured:rest-assured:$versionRestAsssured")
   testImplementation("io.rest-assured:json-schema-validator:$versionRestAsssured")
-
   testImplementation(platform(libs.junit.bom))
   testImplementation(libs.bundles.junit.testing)
   testRuntimeOnly(libs.junit.jupiter.engine)

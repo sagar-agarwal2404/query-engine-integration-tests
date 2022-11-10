@@ -123,12 +123,7 @@ public class IcebergFlinkExtension implements ParameterResolver {
       config.putAll(nessieClientParams(extensionContext));
       config.put(
           CatalogProperties.WAREHOUSE_LOCATION,
-          System.getProperty(
-              "CatalogProperties.WAREHOUSE_LOCATION",
-              IcebergWarehouse.get(extensionContext).getUri().toString()));
-      config.put(
-          CatalogProperties.FILE_IO_IMPL,
-          System.getProperty("CatalogProperties.FILE_IO_IMPL", null));
+          IcebergWarehouse.get(extensionContext).getUri().toString());
       sql("CREATE CATALOG %s WITH %s", catalogName(), toWithClause(config));
     }
 

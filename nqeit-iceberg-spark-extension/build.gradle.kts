@@ -32,11 +32,6 @@ dependencies {
 
   compileOnly(platform(rootProject))
   compileOnly(project(":nqeit-nessie-common"))
-  runtimeOnly("org.apache.iceberg:iceberg-core:1.0.0")
-  runtimeOnly("org.apache.iceberg:iceberg-spark-runtime-3.2_2.12:0.13.1")
-  runtimeOnly("software.amazon.awssdk:bundle:2.17.178")
-  runtimeOnly("software.amazon.awssdk:url-connection-client:2.17.178")
-
   compileOnly(platform(libs.junit.bom))
   compileOnly(libs.junit.jupiter.engine)
 
